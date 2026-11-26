@@ -26,6 +26,7 @@ export function activate(host: SafelightAPI): void {
     title: "Advanced Exposure",
     component: AdvancedExposurePanel,
     defaultDock: { module: "develop", direction: "right", width: 280 },
+    modules: ["develop"],
     onReset: () => {
       const dev = host.stores.useDevelopStore.getState();
       dev.setDynParams({ ...exposureReset(), ...toneReset() });

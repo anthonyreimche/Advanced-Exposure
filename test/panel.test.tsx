@@ -143,18 +143,32 @@ describe("auto", () => {
     expect(rig.commits).toEqual(["Advanced Exposure auto (Average)"]);
   });
 
+  it("stands Spot weighted down when another tool or a picker takes the canvas", async () => {
+    const { rig } = setup();
+    act(() => rig.api.settings.set(KEYS.mode, "spot"));
+    fireEvent.click(screen.getByRole("button", { name: "Auto" }));
+    act(() => rig.dropCanvasTool());
+    expect(screen.getByRole("status").textContent).toBe("");
+    const overlay = render(React.createElement(SpotOverlay, { rect: { x: 0, y: 0, w: 400, h: 300 } }));
+    const surface = overlay.getByTestId("spot-surface");
+    fireEvent.pointerDown(surface, { clientX: 100, clientY: 60, pointerId: 1, button: 0 });
+    fireEvent.pointerUp(surface, { clientX: 100, clientY: 60, pointerId: 1 });
+    await flush();
+    expect(rig.commits).toEqual([]);
+  });
+
   it("arms a rectangle on the image for Spot weighted, and meters it on release", async () => {
     const { rig } = setup();
     act(() => rig.api.settings.set(KEYS.mode, "spot"));
     fireEvent.click(screen.getByRole("button", { name: "Auto" }));
     const tool = rig.canvasTool();
     expect(tool).not.toBeNull();
+    expect(tool?.zoomable).toBe(true);
     expect(screen.getByRole("status").textContent).toBe("Drag a rectangle on the image, or click a spot. Esc cancels.");
     const overlay = render(React.createElement(SpotOverlay, { rect: { x: 0, y: 0, w: 400, h: 300 } }));
     const surface = overlay.getByTestId("spot-surface");
+    expect(surface.style.cursor).toBe("cell");
     vi.spyOn(surface, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 0, y: 0, width: 400, height: 300 }));
-    Object.defineProperty(surface, "offsetWidth", { value: 400 });
-    Object.defineProperty(surface, "offsetHeight", { value: 300 });
     fireEvent.pointerDown(surface, { clientX: 100, clientY: 60, pointerId: 1, button: 0 });
     fireEvent.pointerMove(surface, { clientX: 200, clientY: 150, pointerId: 1 });
     fireEvent.pointerUp(surface, { clientX: 200, clientY: 150, pointerId: 1 });

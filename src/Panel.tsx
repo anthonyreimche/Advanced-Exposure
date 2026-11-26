@@ -137,6 +137,12 @@ function PhotoPanel({ scope }: { scope: ParamScope }) {
   const exposure = readExposure(scope.getParams());
   const [status, setStatus] = React.useState("");
   const preview = useThresholdPreview(prefs);
+  const held = api.develop.useCanvasToolHeld();
+
+  // Another tool or a picker took the canvas: Spot weighted stands down.
+  React.useEffect(() => {
+    if (!held) cancelSpot();
+  }, [held]);
 
   const report = React.useCallback<Report>((r) => setStatus(r.kind === "done" ? r.status : r.reason), []);
   const measuring = React.useCallback(
@@ -294,29 +300,29 @@ function armSpot(pick: (spot: UvRect | Uv) => void, cancel: () => void): void {
   pendingSpot = { pick, cancel };
   api.develop.setCanvasTool({
     overlay: SpotOverlay,
-    onEscape: () => {
-      pendingSpot?.cancel();
-      pendingSpot = null;
-    },
+    zoomable: true,
+    onEscape: cancelSpot,
   });
+}
+
+function cancelSpot(): void {
+  pendingSpot?.cancel();
+  pendingSpot = null;
 }
 
 /** A drag shorter than this, in screen pixels, is a click on a spot. */
 const CLICK_PX = 4;
 
 /** The Spot weighted rectangle over the image. `rect` is the box the frame
- *  shows; the pointer is placed by its fraction across this surface, which
- *  zooming the interface leaves as it is. */
+ *  shows; the pointer is placed in its layout px, which Interface scale
+ *  leaves as it is. */
 export function SpotOverlay({ rect }: { rect: OverlayRect2 }) {
   const { tokens } = api.ui;
   const [drag, setDrag] = React.useState<{ from: Uv; to: Uv; startX: number; startY: number } | null>(null);
 
   const uvAt = (e: React.PointerEvent<HTMLDivElement>): Uv => {
-    const el = e.currentTarget;
-    const b = el.getBoundingClientRect();
-    const x = ((e.clientX - b.left) / b.width) * el.offsetWidth;
-    const y = ((e.clientY - b.top) / b.height) * el.offsetHeight;
-    return { x: (x - rect.x) / rect.w, y: (y - rect.y) / rect.h };
+    const p = api.develop.framePoint(e.currentTarget, e.clientX, e.clientY);
+    return { x: (p.x - rect.x) / rect.w, y: (p.y - rect.y) / rect.h };
   };
 
   const finish = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -343,7 +349,7 @@ export function SpotOverlay({ rect }: { rect: OverlayRect2 }) {
   return (
     <div
       data-testid="spot-surface"
-      style={{ position: "absolute", inset: 0, cursor: "crosshair", pointerEvents: "auto" }}
+      style={{ position: "absolute", inset: 0, cursor: api.cursors.resolve("pick"), pointerEvents: "auto" }}
       onPointerDown={(e) => {
         if (e.button !== 0) return;
         e.currentTarget.setPointerCapture?.(e.pointerId);

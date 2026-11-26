@@ -1,7 +1,7 @@
 {
   "id": "advanced-exposure",
   "name": "Advanced Exposure",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Exposure ahead of the tone mapping, on its own or beside Basic: Exposure in hundredths of a stop, Contrast, Highlights, Shadows, Whites and Blacks, Highlight compression with a threshold, a linear Black level and Midtones; Auto with Average, Centre-weighted, Spot weighted, Highlight priority and Expose to the right modes and an intensity, Shift+double-click auto on single sliders, an Alt-drag clipping view, and exposure matching across a series.",
   "author": "Anthony Reimche",
   "main": "dist/index.js",
@@ -28,5 +28,5 @@
     "match exposure"
   ],
   "repository": "anthonyreimche/Advanced-Exposure",
-  "minAppVersion": "3.2.5"
+  "minAppVersion": "3.2.8"
 }

@@ -1,7 +1,7 @@
 {
   "name": "safelight-advanced-exposure",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Advanced Exposure extension for Safelight: exposure ahead of the tone mapping, with tone shaping, Highlight compression, Black level, Midtones, metering, auto modes and a clipping view.",
   "type": "module",
   "scripts": {

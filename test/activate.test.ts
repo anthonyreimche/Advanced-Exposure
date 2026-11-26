@@ -53,10 +53,10 @@ describe("activate", () => {
   });
 
   it("carries one version and licence in the manifest and the package, and needs the core with the open tone anchor and Slider auto", () => {
-    expect(manifest.version).toBe("1.0.0");
+    expect(manifest.version).toBe("1.0.1");
     expect(pkg.version).toBe(manifest.version);
     expect(manifest.license).toBe("GPL-3.0-or-later");
     expect(pkg.license).toBe(manifest.license);
-    expect(manifest.minAppVersion).toBe("3.2.5");
+    expect(manifest.minAppVersion).toBe("3.2.8");
   });
 });
